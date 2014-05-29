@@ -3,7 +3,8 @@ import cv2
 from matplotlib import pyplot as plt
 font = cv2.FONT_HERSHEY_SIMPLEX
 
-
+fourcc = cv2.cv.CV_FOURCC(*'XVID')
+out = cv2.VideoWriter('demo.avi',fourcc, 20.0, (640,480))
 
 def background():
 	img = 255*np.ones((470,500,3), np.uint8)
@@ -70,12 +71,13 @@ for (t, x1, y1, _, x2, y2, _, x3, y3, _, x4, y4, _, x5, y5) in np.hstack((p1,p2,
 	cv2.putText(bg, "2", (int(x2), int(y2)), font, 0.5, (200,22,0), 2)
 	cv2.putText(bg, "1", (int(x3), int(y3)), font, 0.5, (0,22,200), 2)
 	cv2.putText(bg, "2", (int(x4), int(y4)), font, 0.5, (0,22,200), 2)
-	cv2.circle(bg, (int(x5), int(y5)), 5, (255,102,0), -1)
+	cv2.circle(bg, (int(x5), int(y5)), 5, (0, 255,102), -1)
 	cv2.putText(bg, "time: %s"%t, 
 						(0,450), font, .5, (255,0,0), 2)
 	cv2.imshow('img',bg)
+	out.write(bg)
 	#import pdb; pdb.set_trace()
 	if cv2.waitKey(50) & 0xFF == ord('q'):
 		break
-
+out.release()
 cv2.destroyAllWindows()
