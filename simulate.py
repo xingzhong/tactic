@@ -1,10 +1,9 @@
 import numpy as np
 import cv2
 from matplotlib import pyplot as plt
-font = cv2.FONT_HERSHEY_SIMPLEX
 
-fourcc = cv2.cv.CV_FOURCC(*'XVID')
-out = cv2.VideoWriter('demo.avi',fourcc, 20.0, (640,480))
+
+
 
 def background():
 	img = 255*np.ones((470,500,3), np.uint8)
@@ -50,40 +49,47 @@ def path(file):
 	y = np.interp(t, xp, fp2)
 	return  np.vstack((t, x, y)).T
 
-pos = np.random.randint(10, high=450, size=(50, 5, 2))
-#pos = np.array([[60, 300], [80, 310], [55, 280], [85, 290], [61, 301]])
-#pos = np.genfromtxt("pos.csv", delimiter=',', skip_header=1, dtype=int).reshape(-1, 5, 5)
+if __name__ == '__main__':
+	font = cv2.FONT_HERSHEY_SIMPLEX
+	fourcc = cv2.cv.CV_FOURCC(*'XVID')
+	out = cv2.VideoWriter('demo.avi',fourcc, 20.0, (640,480))
+	pos = np.random.randint(10, high=450, size=(50, 5, 2))
+	#pos = np.array([[60, 300], [80, 310], [55, 280], [85, 290], [61, 301]])
+	#pos = np.genfromtxt("pos.csv", delimiter=',', skip_header=1, dtype=int).reshape(-1, 5, 5)
 
-#fig = plt.figure()
-#ax = fig.gca()
-#plt.imshow(background())
-#ax.set_xticks(np.arange(0,520, 30))
-#ax.set_yticks(np.arange(0,490, 30))
-#ax.tick_params(axis='both', which='major', labelsize=10)
-#plt.grid(True)
-#plt.savefig('court.png', dpi=600)
-#plt.show()
-#import pdb; pdb.set_trace()
-p1 = path("player1.csv")
-p2 = path("player2.csv")
-p3 = path("player3.csv")
-p4 = path("player4.csv")
-ball = path("ball.csv")
-
-
-for (t, x1, y1, _, x2, y2, _, x3, y3, _, x4, y4, _, x5, y5) in np.hstack((p1,p2,p3,p4,ball)):
-	bg = background()
-	cv2.putText(bg, "1", (int(x1), int(y1)), font, 0.5, (200,22,0), 2)
-	cv2.putText(bg, "2", (int(x2), int(y2)), font, 0.5, (200,22,0), 2)
-	cv2.putText(bg, "1", (int(x3), int(y3)), font, 0.5, (0,22,200), 2)
-	cv2.putText(bg, "2", (int(x4), int(y4)), font, 0.5, (0,22,200), 2)
-	cv2.circle(bg, (int(x5), int(y5)), 5, (0, 255,102), -1)
-	cv2.putText(bg, "time: %s"%t, 
-						(0,450), font, .5, (255,0,0), 2)
-	cv2.imshow('img',bg)
-	out.write(bg)
+	#fig = plt.figure()
+	#ax = fig.gca()
+	#plt.imshow(background())
+	#ax.set_xticks(np.arange(0,520, 30))
+	#ax.set_yticks(np.arange(0,490, 30))
+	#ax.tick_params(axis='both', which='major', labelsize=10)
+	#plt.grid(True)
+	#plt.savefig('train.png', dpi=300)
+	#plt.show()
 	#import pdb; pdb.set_trace()
-	if cv2.waitKey(50) & 0xFF == ord('q'):
-		break
-out.release()
-cv2.destroyAllWindows()
+	p1 = path("player1.csv")
+	p2 = path("player2.csv")
+	p3 = path("player3.csv")
+	p4 = path("player4.csv")
+	ball = path("ball.csv")
+
+
+	for (t, x1, y1, _, x2, y2, _, x3, y3, _, x4, y4, _, x5, y5) in np.hstack((p1,p2,p3,p4,ball)):
+		bg = background()
+		cv2.putText(bg, "1", (int(x1), int(y1)), font, 0.5, (200,22,0), 2)
+		cv2.putText(bg, "2", (int(x2), int(y2)), font, 0.5, (200,22,0), 2)
+		cv2.line(bg, (int(x1), int(y1)), (int(x2), int(y2)), (200,22,0), 1)
+		cv2.putText(bg, "1", (int(x3), int(y3)), font, 0.5, (0,22,200), 2)
+		cv2.putText(bg, "2", (int(x4), int(y4)), font, 0.5, (0,22,200), 2)
+		cv2.line(bg, (int(x1), int(y1)), (int(x3), int(y3)), (0,0,128), 1)
+		cv2.line(bg, (int(x2), int(y2)), (int(x3), int(y3)), (0,0,128), 1)
+		cv2.circle(bg, (int(x5), int(y5)), 5, (0, 255,102), -1)
+		cv2.putText(bg, "time: %s"%t, 
+							(0,450), font, .5, (255,0,0), 2)
+		cv2.imshow('img',bg)
+		out.write(bg)
+		#import pdb; pdb.set_trace()
+		if cv2.waitKey(50) & 0xFF == ord('q'):
+			break
+	out.release()
+	cv2.destroyAllWindows()
