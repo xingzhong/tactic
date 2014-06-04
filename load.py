@@ -3,7 +3,6 @@ import cv2
 from matplotlib import pyplot as plt
 
 cap = cv2.VideoCapture('nba4.avi')
-fgbg = cv2.BackgroundSubtractorMOG()
 init = True
 height = 256
 width = 128
@@ -25,4 +24,4 @@ while(cap.isOpened()):
         break
 
 cap.release()
-#cv2.destroyAllWindows()
+cv2.destroyAllWindows()
