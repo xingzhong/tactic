@@ -14,6 +14,7 @@ def func(x, tpl, blank):
 	tplRot = cv2.warpPerspective(tpl,x,(w,h))
 	return -np.sum(np.logical_and(blank, tplRot))
 
+
 cap = cv2.VideoCapture('nba4_clip.avi')
 #fourcc = cv2.VideoWriter_fourcc(*'XVID')
 #out = cv2.VideoWriter('cali.avi',fourcc, 20.0, (640,480))

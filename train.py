@@ -17,11 +17,17 @@ def train():
 
 	cv2.ellipse(img,(63, 300),(285,285), 0, -68, 68, 255,2)
 	cv2.ellipse(img,(228, 300),(72,72), 0, -90, 90, 255,2)
+	for x in range(0, 600, 60):
+		cv2.line(img, (x, 0), (x, 600), 168, 1)
+	for y in range(0, 600, 60):
+		cv2.line(img, (0, y), (600, y), 168, 1)
 	return img
 	
 
 
 if __name__ == '__main__':
-	cv2.imshow('detected', train())
-	cv2.waitKey(0)
+	while(True):
+		cv2.imshow('detected', train())
+		k = cv2.waitKey(50) & 0xFF
+		if k == 27: break
 	cv2.destroyAllWindows()
