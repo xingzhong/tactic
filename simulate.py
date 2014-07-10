@@ -1,45 +1,43 @@
 import numpy as np
 import cv2
-from matplotlib import pyplot as plt
+from train import train
+from sklearn.mixture.gmm import log_multivariate_normal_density
+import csv
 
+Color = {'rb' : (255, 65, 105), 'tq' : (208, 64, 224), 
+		'sb': (96, 244, 164), 'pl': (221, 221, 160),
+		'ls': (122, 255, 160)}
 
+def polar(xy, zero=(63, 300)):
+	x, y = xy
+	x0, y0 = zero
+	x = x-x0
+	y = y-y0
+	r = np.sqrt(x**2+y**2)
+	theta = np.arctan2(y, x)
+	return np.array([r, theta])
 
+def Degree(ps):
+	p1, p2, p3, p4 = map(np.array, ps)
+	x = np.array([p4-p1, p2-p1])
+	n  = np.linalg.norm(x, axis=1)
+	nx = x[0, :]/n[0]
+	ny = x[1, :]/n[1]
+	#import pdb; pdb.set_trace()
+	theta = 57.3* np.arccos(np.dot(nx, ny))
+	return theta
+	
+def Split(ps):
+	p1, p2, p3, p4 = map(np.array, ps)
+	return np.linalg.norm(p1-p2)
 
-def background():
-	img = 255*np.ones((470,500,3), np.uint8)
-	cv2.line(img,(30,0),(30,140),(0,0,0),2)
-	cv2.line(img,(170,0),(170,190),(0,0,0),2)
-	cv2.line(img,(190,0),(190,190),(0,0,0),2)
-	cv2.line(img,(310,0),(310,190),(0,0,0),2)
-	cv2.line(img,(330,0),(330,190),(0,0,0),2)
-	cv2.line(img,(470,0),(470,140),(0,0,0),2)
-
-	cv2.line(img,(220,40),(280,40),(0,0,0),2)
-	cv2.line(img,(170,190),(330,190),(0,0,0),2)
-
-	cv2.circle(img,(250,47),7,(0,0,0),2)
-	cv2.ellipse(img,(250,47),(40,40), 0, 0, 180, (0,0,0),2)
-	cv2.ellipse(img,(250,47),(238,238),0, 22, 158, (0,0,0),2)
-	cv2.circle(img,(250,190),60,(0,0,0),2)
-	return img
-
-def player(img, pos):
-	for time, player, team, x, y in pos:
-		if team == 1:
-			color = (200,22,0)
-			cv2.putText(img, str(player), 
-					(x, y), font, 0.5, color, 2)
-		elif team == 0:
-			color = (0,22,200)
-			cv2.putText(img, str(player), 
-					(x, y), font, 0.5, color, 2)
-		else:
-			color = (255,102,0)
-			cv2.circle(img, (x, y), 5, color, 2)
-		print str(time)
-		cv2.putText(img, "time: %s"%time, 
-						(0,450), font, .5, (255,0,0), 2)
-	return img
+def DScore(ps):
+	p1, p2, p3, p4 = map(polar, ps)
+	means = np.array([50, 0]).reshape(1,2)
+	covars = np.array([5, .1]).reshape(1,2)
+	x = np.array([p1-p3, p2-p4])
+	s = log_multivariate_normal_density(x, means, covars)
+	return np.sum(s)
 
 def path(file):
 	p = np.genfromtxt(file, delimiter=',', dtype=int)
@@ -51,45 +49,58 @@ def path(file):
 
 if __name__ == '__main__':
 	font = cv2.FONT_HERSHEY_SIMPLEX
-	fourcc = cv2.cv.CV_FOURCC(*'XVID')
-	out = cv2.VideoWriter('demo.avi',fourcc, 20.0, (640,480))
-	pos = np.random.randint(10, high=450, size=(50, 5, 2))
-	#pos = np.array([[60, 300], [80, 310], [55, 280], [85, 290], [61, 301]])
-	#pos = np.genfromtxt("pos.csv", delimiter=',', skip_header=1, dtype=int).reshape(-1, 5, 5)
-
-	#fig = plt.figure()
-	#ax = fig.gca()
-	#plt.imshow(background())
-	#ax.set_xticks(np.arange(0,520, 30))
-	#ax.set_yticks(np.arange(0,490, 30))
-	#ax.tick_params(axis='both', which='major', labelsize=10)
-	#plt.grid(True)
-	#plt.savefig('train.png', dpi=300)
-	#plt.show()
-	#import pdb; pdb.set_trace()
+	fourcc = cv2.VideoWriter_fourcc(*'XVID')
+	out = cv2.VideoWriter('pp.avi',fourcc, 20.0, (600,600))
 	p1 = path("player1.csv")
 	p2 = path("player2.csv")
 	p3 = path("player3.csv")
 	p4 = path("player4.csv")
 	ball = path("ball.csv")
-
-
+	f2d = []
 	for (t, x1, y1, _, x2, y2, _, x3, y3, _, x4, y4, _, x5, y5) in np.hstack((p1,p2,p3,p4,ball)):
-		bg = background()
-		cv2.putText(bg, "1", (int(x1), int(y1)), font, 0.5, (200,22,0), 2)
-		cv2.putText(bg, "2", (int(x2), int(y2)), font, 0.5, (200,22,0), 2)
-		cv2.line(bg, (int(x1), int(y1)), (int(x2), int(y2)), (200,22,0), 1)
-		cv2.putText(bg, "1", (int(x3), int(y3)), font, 0.5, (0,22,200), 2)
-		cv2.putText(bg, "2", (int(x4), int(y4)), font, 0.5, (0,22,200), 2)
-		cv2.line(bg, (int(x1), int(y1)), (int(x3), int(y3)), (0,0,128), 1)
-		cv2.line(bg, (int(x2), int(y2)), (int(x3), int(y3)), (0,0,128), 1)
-		cv2.circle(bg, (int(x5), int(y5)), 5, (0, 255,102), -1)
-		cv2.putText(bg, "time: %s"%t, 
-							(0,450), font, .5, (255,0,0), 2)
+		bg = train()
+		bg = cv2.cvtColor(bg, cv2.COLOR_GRAY2BGR)
+
+		cv2.circle(bg, (int(x1), int(y1)), 10, Color['rb'], 2)
+		cv2.circle(bg, (int(x2), int(y2)), 10, Color['tq'], 2)
+		cv2.circle(bg, (int(x3), int(y3)), 10, Color['sb'], 2)
+		cv2.circle(bg, (int(x4), int(y4)), 10, Color['pl'], 2)
+		cv2.circle(bg, (int(x5), int(y5)), 5, Color['ls'], -1)
+		pts = [(int(x1), int(y1)), (int(x2), int(y2)), (int(x3), int(y3)), (int(x4), int(y4))]
+		defence = DScore(pts)
+		degree = Degree(pts)
+		split = Split(pts)
+
+		cv2.line(bg, (63, 300), (int(x1), int(y1)), Color['rb'], 1)
+		cv2.line(bg, (63, 300), (int(x2), int(y2)), Color['tq'], 1)
+		cv2.line(bg, (63, 300), (int(x3), int(y3)), Color['sb'], 1)
+		cv2.line(bg, (63, 300), (int(x4), int(y4)), Color['pl'], 1)
+
+		cv2.line(bg, (int(x1), int(y1)), (int(x2), int(y2)), (255,255,255), 2)
+		#cv2.line(bg, (int(x1), int(y1)), (int(x3), int(y3)), (255,0,0), 1)
+		cv2.line(bg, (int(x1), int(y1)), (int(x4), int(y4)), (255,255,255), 2)
+		#cv2.line(bg, (int(x2), int(y2)), (int(x4), int(y4)), (255,255,255), 1)
+		#cv2.line(bg, (int(x2), int(y2)), (int(x4), int(y4)), (255,0,0), 1)
+		#cv2.line(bg, (int(x3), int(y3)), (int(x4), int(y4)), (255,0,0), 1)
+
+		cv2.putText(bg, "# %s"%t, (450,450), font, 1, (255,255,255), 1)
+		cv2.putText(bg, "D %s"%int(defence), (450,490), font, 1, (255,255,255), 1)
+		cv2.putText(bg, "T %s"%int(degree), (450,530), font, 1, (255,255,255), 1)
+		cv2.putText(bg, "S %s"%int(split), (450,570), font, 1, (255,255,255), 1)
+		f2d.append((int(defence), int(degree), int(split)))
+
 		cv2.imshow('img',bg)
 		out.write(bg)
-		#import pdb; pdb.set_trace()
-		if cv2.waitKey(50) & 0xFF == ord('q'):
+		if cv2.waitKey(50) & 0xFF == 27:
 			break
+		if t%10 == 3:
+			while(1):
+				cv2.imshow('img',bg)
+				k = cv2.waitKey(100) & 0xFF 
+				if k == ord('c'):
+					break
+	with open('features.csv', 'w') as fp:
+		a = csv.writer(fp, delimiter=',')
+		a.writerows(f2d)
 	out.release()
 	cv2.destroyAllWindows()

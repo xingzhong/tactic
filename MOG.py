@@ -1,7 +1,6 @@
 import cv2
 import numpy as np
 from train import train
-from matplotlib import pyplot as plt
 
 
 def draw_detections(img, rects, thickness = 2, weight = None):

@@ -1,6 +1,6 @@
 import numpy as np
 import cv2
-from matplotlib import pyplot as plt
+#from matplotlib import pyplot as plt
 
 def train():
 	img = np.zeros((600,600), np.uint8)
@@ -17,6 +17,7 @@ def train():
 
 	cv2.ellipse(img,(63, 300),(285,285), 0, -68, 68, 255,2)
 	cv2.ellipse(img,(228, 300),(72,72), 0, -90, 90, 255,2)
+	cv2.circle(img, (63, 300), 7, 255, 1)
 	for x in range(0, 600, 60):
 		cv2.line(img, (x, 0), (x, 600), 60, 1)
 	for y in range(0, 600, 60):
